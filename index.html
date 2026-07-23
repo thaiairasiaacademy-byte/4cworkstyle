@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assessment: Work Style & Development</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <style>
+        :root {
+            --primary-red: #da291c;
+            --primary-hover: #b52015;
+            --bg-color: #f7f8fa;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --border-color: #e0e0e0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Prompt', sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; min-height: 100vh; }
+        .main-wrapper { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; width: 100%; }
+        
+        .header { margin-bottom: 25px; text-align: center; }
+        .header img { max-width: 180px; height: auto; mix-blend-mode: multiply; background-color: transparent; }
+
+        .card-container { background: var(--card-bg); width: 100%; max-width: 700px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); overflow: hidden; position: relative; }
+        .progress-container { width: 100%; height: 6px; background-color: #eeeeee; }
+        .progress-bar { height: 100%; background-color: var(--primary-red); width: 0%; transition: width 0.4s ease; }
+        .content-section { padding: 40px 30px; }
+
+        .reg-header { text-align: center; margin-bottom: 25px; color: var(--primary-red); }
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; margin-bottom: 8px; font-weight: 500; }
+        .input-group input { width: 100%; padding: 12px 15px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 1rem; outline: none; transition: border-color 0.3s; }
+        .input-group input:focus { border-color: var(--primary-red); }
+
+        .instructions-box { background-color: #fdf5f5; border-left: 4px solid var(--primary-red); padding: 20px; border-radius: 4px; margin-bottom: 25px; }
+        .instructions-box ul { margin-top: 8px; padding-left: 20px; color: #444; line-height: 1.65; font-size: 0.95rem; }
+        .instructions-box li { margin-bottom: 6px; }
+
+        .transition-box { text-align: center; padding: 20px 0; }
+        .transition-box h2 { color: var(--primary-red); font-size: 1.8rem; margin-bottom: 15px; }
+        .transition-box p.intro-text { font-size: 1.1rem; color: #555; margin-bottom: 25px; line-height: 1.6; }
+
+        .question-header { text-align: center; margin-bottom: 30px; }
+        .question-number { font-size: 0.9rem; color: var(--primary-red); font-weight: 600; letter-spacing: 1px; margin-bottom: 8px; display: block; }
+        .question-text { font-size: 1.25rem; font-weight: 500; }
+        .options-container { display: flex; flex-direction: column; gap: 15px; }
+        .option-card { border: 2px solid var(--border-color); border-radius: 8px; padding: 20px; cursor: pointer; transition: all 0.2s ease; background-color: #fff; display: flex; align-items: center; }
+        .option-card:hover { border-color: var(--primary-red); background-color: #fdf5f5; }
+        .option-card.selected { border-color: var(--primary-red); background-color: #fdf5f5; box-shadow: 0 4px 10px rgba(218, 41, 28, 0.1); }
+        .option-text { font-size: 1.05rem; line-height: 1.5; color: var(--text-main); }
+
+        .textarea-container { display: flex; flex-direction: column; gap: 10px; }
+        textarea { width: 100%; height: 220px; padding: 20px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 1.1rem; resize: none; outline: none; transition: border-color 0.3s; line-height: 1.6; }
+        textarea:focus { border-color: var(--primary-red); }
+        .char-count { text-align: right; font-size: 0.95rem; font-weight: 500; }
+        .char-count.invalid { color: #da291c; }
+        .char-count.valid { color: #16a34a; }
+
+        .quiz-footer { display: flex; padding: 20px 30px; background-color: #fafafa; border-top: 1px solid var(--border-color); gap: 10px; }
+        .footer-center { justify-content: center; }
+        .footer-between { justify-content: space-between; }
+        .footer-right { justify-content: flex-end; }
+        
+        .btn { padding: 12px 28px; border-radius: 6px; font-size: 1rem; font-weight: 500; cursor: pointer; border: none; transition: 0.2s; }
+        .btn-full { width: 100%; }
+        .btn-prev { background-color: #e0e0e0; color: var(--text-main); }
+        .btn-prev:hover { background-color: #d0d0d0; }
+        .btn-next { background-color: var(--primary-red); color: white; }
+        .btn-next:hover { background-color: var(--primary-hover); }
+        .btn-next:disabled { background-color: #d1d5db !important; color: #9ca3af !important; cursor: not-allowed; }
+
+        /* การแสดงผลกราฟ */
+        .summary-header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
+        .chart-box { position: relative; height: 295px; margin: 20px 0; background: #fdfdfd; border: 1px solid #e5e7eb; border-radius: 8px; padding-top: 20px; }
+        
+        .chart-grid { position: absolute; top: 20px; bottom: 70px; left: 48px; right: 20px; display: flex; flex-direction: column; justify-content: space-between; }
+        .grid-line { width: 100%; border-bottom: 1px dashed #d1d5db; position: relative; }
+        .grid-line.base { border-bottom: 2px solid #9ca3af; }
+        
+        .grid-label { 
+            position: absolute; 
+            left: -24px; 
+            top: -8px; 
+            font-size: 0.75rem; 
+            color: #6b7280; 
+            font-weight: 600; 
+            width: 18px; 
+            text-align: right; 
+        }
+
+        .bars-container { position: absolute; top: 20px; bottom: 70px; left: 52px; right: 20px; display: flex; justify-content: space-around; align-items: flex-end; z-index: 1; }
+        
+        .bar-group { width: 22%; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; position: relative; }
+        .bar-track { width: 100%; background-color: transparent; display: flex; flex-direction: column; justify-content: flex-end; border-radius: 6px 6px 0 0; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        
+        .segment-green { background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%); border-bottom: 1px solid rgba(0,0,0,0.2); box-shadow: inset 0 -2px 4px rgba(0,0,0,0.15); }
+        .segment-amber { background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%); border-bottom: 1px solid rgba(0,0,0,0.2); box-shadow: inset 0 -2px 4px rgba(0,0,0,0.15); }
+        .segment-red { background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%); }
+
+        .bar-labels { 
+            position: absolute; 
+            bottom: -64px; 
+            left: 0;
+            width: 100%; 
+            text-align: center; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        .bar-label-title { 
+            font-size: 0.65rem; 
+            font-weight: 600; 
+            color: #333; 
+            line-height: 1.15; 
+            text-align: center;
+            width: 100%;
+            word-break: normal;
+            white-space: nowrap;
+            letter-spacing: -0.2px;
+        }
+        .bar-label-score { 
+            font-size: 0.85rem; 
+            color: var(--primary-red); 
+            font-weight: 700; 
+            margin-top: 3px; 
+        }
+
+        /* พื้นที่ Capture ลับขนาด 700px สำหรับส่งภาพเข้า Drive/Email/PDF */
+        #export-area {
+            position: absolute;
+            left: -9999px;
+            top: -9999px;
+            width: 700px !important;
+            background-color: #ffffff !important;
+            padding: 30px !important;
+            box-sizing: border-box !important;
+            font-family: 'Prompt', sans-serif !important;
+        }
+        #export-area .summary-header h2 { font-size: 1.5rem !important; color: var(--primary-red) !important; text-align: center !important; }
+        #export-area .summary-header p { font-size: 1rem !important; text-align: center !important; }
+        #export-area .chart-grid { left: 48px !important; right: 20px !important; }
+        #export-area .bars-container { left: 52px !important; right: 20px !important; }
+        #export-area .grid-label { left: -24px !important; width: 18px !important; }
+        #export-area .bar-labels { width: 100% !important; left: 0 !important; }
+        #export-area .bar-label-title { font-size: 0.72rem !important; letter-spacing: -0.2px !important; }
+
+        /* Responsive สำหรับจอมือถือทั่วไป (<= 480px) */
+        @media (max-width: 480px) {
+            .content-section { padding: 25px 12px; }
+            .option-text { font-size: 0.95rem; }
+            .chart-grid { left: 38px; right: 12px; }
+            .bars-container { left: 42px; right: 12px; }
+            .grid-label { left: -20px; font-size: 0.7rem; width: 16px; }
+            .bar-group { width: 23%; }
+            .bar-label-title { font-size: 0.55rem; letter-spacing: -0.4px; }
+            .bar-label-score { font-size: 0.8rem; margin-top: 2px; }
+        }
+
+        /* Responsive สำหรับจอมือถือเล็กพิเศษ เช่น iPhone SE (<= 380px) */
+        @media (max-width: 380px) {
+            .content-section { padding: 20px 8px; }
+            .chart-grid { left: 35px; right: 10px; }
+            .bars-container { left: 38px; right: 10px; }
+            .grid-label { left: -18px; font-size: 0.65rem; width: 14px; }
+            .bar-label-title { font-size: 0.48rem; letter-spacing: -0.5px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- พื้นที่ Capture ลับ (700px Desktop Standard) -->
+    <div id="export-area">
+        <div class="summary-header">
+            <h2>สไตล์การทำงานของคุณ</h2>
+            <p style="margin-top: 5px; color: #555;"><strong id="expName" style="color: #333;"></strong> | <span id="expEmail"></span></p>
+        </div>
+        <p style="text-align: center; color: #666; font-size: 0.95rem; margin-bottom: 15px;">
+            ผลลัพธ์ด้านล่างสะท้อนสไตล์การทำงานของคุณใน 4 ด้าน<br>
+            ลองใช้ข้อมูลนี้เป็นจุดเริ่มต้นในการทำความรู้จักตัวเองให้มากขึ้น ก่อนที่เราจะได้เจอกันในหลักสูตร
+        </p>
+        <div id="expChartContainer"></div>
+    </div>
+
+    <div class="main-wrapper">
+        <div class="header">
+            <img crossorigin="anonymous" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQX-QXhA461xxFyyMmTgssjdbToxYtKeHmrMmsfZIF8UQ&s=10" alt="Corporate Logo">
+        </div>
+
+        <div class="card-container">
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+
+            <!-- View 1: Registration -->
+            <div id="view-registration" style="display: none;">
+                <div class="content-section">
+                    <h2 class="reg-header">Assessment Form</h2>
+                    <div class="input-group">
+                        <label>Full Name (ภาษาอังกฤษเท่านั้น)</label>
+                        <input type="text" id="regName" oninput="validateNameInput(this)" placeholder="Name Surname">
+                    </div>
+                    <div class="input-group">
+                        <label>Email Address</label>
+                        <input type="email" id="regEmail" placeholder="your.email@company.com">
+                    </div>
+
+                    <!-- อัปเดตคำชี้แจงและวัตถุประสงค์ตามร่างล่าสุด -->
+                    <div class="instructions-box">
+                        <strong style="color: var(--primary-red); font-size: 1.05rem;">ยินดีต้อนรับสู่ 4C Building Blocks Program</strong>
+                        <p style="margin-top: 10px; color: #444; line-height: 1.7; font-size: 1rem;">
+                        ก่อนที่เราจะได้พบกันในหลักสูตร เราอยากทำความรู้จักคุณและทีมของคุณให้มากขึ้น เพื่อเตรียมประสบการณ์การเรียนรู้ที่ตอบโจทย์และเป็นประโยชน์กับคุณอย่างแท้จริง
+                        </p>
+
+                        <strong style="color: var(--primary-red); font-size: 1.05rem;">ก่อนเริ่ม มาดูกันสักนิด</strong>
+                        <ul style="margin-bottom: 18px;">
+                            <li><strong>ส่วนที่ 1 (24 ข้อ):</strong> สำรวจสไตล์การทำงานที่คุณถนัด</li>
+                            <li><strong>ส่วนที่ 2 (4 ข้อ):</strong> แบ่งปันความคิดเห็นและสิ่งที่คุณคาดหวังจากหลักสูตร</li>
+                            <li>ใช้เวลารวมประมาณ 12–15 นาที</li>
+                        </ul>
+
+                        <strong style="color: var(--primary-red); font-size: 1.05rem;">คำตอบของคุณสำคัญกับเรา</strong>
+                        <ul>
+                            <li>เพื่อทำความรู้จักคุณและทีมมากขึ้น ก่อนเราจะเจอกันที่หลักสูตร</li>
+                            <li>เพื่อออกแบบเนื้อหาให้ตอบโจทย์ความต้องการของกลุ่มคุณอย่างแท้จริง</li>
+                            <li>ไม่มีคำตอบที่ถูกหรือผิด — เราต้องการรับฟังมุมมองของคุณอย่างเปิดใจ</li>
+                        </ul>
+
+                        <strong style="color: var(--primary-red); font-size: 1.05rem;">เราจะดูแลข้อมูลของคุณอย่างไร</strong>
+                        <ul>
+                            <li>ผลของคุณจะถูกส่งกลับให้คุณโดยตรงหลังทำแบบสำรวจเสร็จ เพื่อการพัฒนาตนเอง</li>
+                            <li>ข้อมูลภาพรวมของกลุ่ม (ไม่ระบุตัวบุคคล) จะถูกใช้เพื่อปรับหลักสูตรให้เหมาะสม</li>
+                            <li>AirAsia Academy ให้ความสำคัญกับการคุ้มครองข้อมูลส่วนบุคคลของคุณ ตามหลัก PDPA และจะไม่นำข้อมูลไปใช้เพื่อวัตถุประสงค์อื่นนอกเหนือจากหลักสูตรนี้</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="quiz-footer footer-right">
+                    <button class="btn btn-next btn-full" onclick="startAssessment()">เริ่มทำแบบสำรวจ</button>
+                </div>
+            </div>
+
+            <!-- View 2: Transition Part 1 -->
+            <div id="view-transition-p1" style="display: none;">
+                <div class="content-section transition-box">
+                    <h2>เตรียมพร้อมเข้าสู่ ส่วนที่ 1</h2>
+                    <p class="intro-text">ทำความรู้จักสไตล์การทำงานของคุณ</p>
+                    <hr style="margin: 20px 0; border: none; border-top: 1px dashed #ccc;">
+                    <div style="background-color: #fdf5f5; border-left: 4px solid var(--primary-red); padding: 20px; text-align: left; margin-bottom: 10px; border-radius: 4px;">
+                        <strong style="color: var(--primary-red); font-size: 1.1rem;">คำแนะนำสำหรับส่วนที่ 1 (24 ข้อ):</strong>
+                        <ul style="margin-top: 10px; color: #444; line-height: 1.7; font-size: 1rem; padding-left: 20px;">
+                            <li>ในส่วนนี้เราอยากชวนคุณสำรวจสไตล์การทำงานของตัวเอง โปรดเลือกคำตอบที่รู้สึกว่าเป็นตัวคุณมากที่สุด</li>
+                            <li><b>ไม่มีคำตอบที่ถูกหรือผิด</b> ตอบตามความรู้สึกและพฤติกรรมที่คุณเป็นจริง ๆ ในการทำงาน เพื่อให้ผลลัพธ์สะท้อนสไตล์และแนวทางการทำงานของคุณได้อย่างแท้จริง</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="quiz-footer footer-between">
+                    <button class="btn btn-prev" onclick="switchView('REG')">ย้อนกลับ</button>
+                    <button class="btn btn-next" onclick="startPart1()">เริ่มทำส่วนที่ 1</button>
+                </div>
+            </div>
+
+            <!-- View 3: Quiz Part 1 -->
+            <div id="view-part1" style="display: none;">
+                <div class="content-section">
+                    <div class="question-header">
+                        <span class="question-number" id="p1Number">ส่วนที่ 1: ข้อที่ 1 / 24</span>
+                        <h2 class="question-text">ข้อใดตรงกับสไตล์การทำงานของคุณมากที่สุด?</h2>
+                    </div>
+                    <div class="options-container" id="p1Options"></div>
+                </div>
+                <div class="quiz-footer footer-center">
+                    <button class="btn btn-prev" id="btnPrevP1" onclick="prevQuestionP1()">ย้อนกลับ</button>
+                </div>
+            </div>
+
+            <!-- View 4: Transition Part 2 -->
+            <div id="view-transition" style="display: none;">
+                <div class="content-section transition-box">
+                    <h2>คุณผ่านส่วนที่ 1 เรียบร้อยแล้ว</h2>
+                    <p class="intro-text">
+                        ในส่วนถัดไป เราอยากรับฟังความคิดเห็นและความคาดหวังของคุณต่อหลักสูตร<br>
+                        เพื่อให้เราดำเนินการจัดเนื้อหาให้ตรงกับสิ่งที่คุณต้องการอย่างแท้จริง</b>
+                    </p>
+                    <hr style="margin: 20px 0; border: none; border-top: 1px dashed #ccc;">
+                    <div style="background-color: #fdf5f5; border-left: 4px solid var(--primary-red); padding: 20px; text-align: left; margin-bottom: 10px; border-radius: 4px;">
+                        <strong style="color: var(--primary-red); font-size: 1.1rem;">คำแนะนำสำหรับส่วนที่ 2</strong>
+                        <ul style="margin-top: 10px; padding-left: 20px; color: #444; line-height: 1.7; font-size: 1rem;">
+                            <li>ส่วนนี้ประกอบด้วยคำถามปลายเปิด <b>4 ข้อ</b> ให้คุณแบ่งปันมุมมองอย่างอิสระ</li>
+                            <li>แต่ละคำตอบใช้ข้อความประมาณ <b>100–150 ตัวอักษร</b> เพียงพอที่จะสะท้อนความคิดของคุณ</li>
+                            <li>เมื่อพิมพ์ครบ ระบบจะเปิดปุ่ม <b>"ถัดไป"</b> ให้อัตโนมัติ</li>
+                            <li><b>ตอบตามความรู้สึกจริงของคุณได้เลย</b> — ทุกความคิดเห็นมีคุณค่าสำหรับเรา</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="quiz-footer footer-between">
+                    <button class="btn btn-prev" onclick="backToPart1()">ย้อนกลับไปส่วนที่ 1</button>
+                    <button class="btn btn-next" onclick="startPart2()">เริ่มเขียนคำตอบ</button>
+                </div>
+            </div>
+
+            <!-- View 5: Quiz Part 2 -->
+            <div id="view-part2" style="display: none;">
+                <div class="content-section">
+                    <div style="text-align: center; color: var(--primary-red); font-weight: 500; font-size: 1.1rem; margin-bottom: 25px; border-bottom: 2px dashed #e0e0e0; padding-bottom: 15px;">
+                        ส่วนที่ 2: คุณอยากเห็นการพัฒนากระบวนการคิดของคุณอย่างไรบ้าง
+                    </div>
+                    <div class="question-header" style="margin-bottom: 20px;">
+                        <span class="question-number" id="p2Number">ข้อเขียนที่ 1 / 4</span>
+                        <h2 class="question-text" id="p2QuestionText">Question...</h2>
+                    </div>
+                    <div class="textarea-container">
+                        <textarea id="part2Text" maxlength="150" placeholder="พิมพ์คำตอบของคุณที่นี่..." oninput="validateText()"></textarea>
+                        <div id="charCount" class="char-count invalid">0 / 150</div>
+                    </div>
+                </div>
+                <div class="quiz-footer footer-between">
+                    <button class="btn btn-prev" onclick="prevQuestionP2()">ย้อนกลับ</button>
+                    <button class="btn btn-next" id="btnNextP2" onclick="nextQuestionP2()">ถัดไป</button>
+                </div>
+            </div>
+
+            <!-- View 6: Summary Report -->
+            <div id="view-summary" style="display: none;">
+                <div id="capture-area">
+                    <div class="content-section">
+                        <div class="summary-header">
+                            <h2 style="color: var(--primary-red);">แนวโน้มสไตล์การทำงานของท่าน</h2>
+                            <p style="margin-top: 5px; color: #555;"><strong id="resName" style="color: #333;"></strong> | <span id="resEmail"></span></p>
+                        </div>
+                        
+                        <p style="text-align: center; color: #666; font-size: 0.95rem; margin-bottom: 15px;">
+                            ระบบบันทึกคำตอบและส่งผลลัพธ์ไปยังอีเมลของท่านเรียบร้อยแล้ว<br>
+                            ด้านล่างคือผลการวิเคราะห์สไตล์การทำงานของท่านจากส่วนที่ 1
+                        </p>
+
+                        <div id="chartContainer"></div>
+                    </div>
+                </div>
+
+                <div class="quiz-footer footer-between" style="flex-wrap: wrap;">
+                    <button class="btn btn-prev" onclick="downloadPNG()">บันทึกเป็นไฟล์ PNG</button>
+                    <button class="btn btn-next" onclick="closeWindow()">ปิดหน้าต่าง</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx1BxuzyUZe7Ja4BeJ9hhxAJA-iIEEWTqjM6fIwc2-4jA7Axrd06PblZlcANxdCcTj5/exec'; 
+
+        let part1Questions = [
+            { typeA: "COM", typeB: "COL", textA: "ฉันชอบแชร์ข้อมูลและอัปเดตงานกับคนอื่นในทีมบ่อย ๆ เพื่อให้ทุกคนเข้าใจตรงกันและทำงานร่วมกันได้ดีขึ้น", textB: "ฉันเอาเป้าหมายส่วนรวมของทีมเป็นที่ตั้ง และยินดีช่วยเหลืองานของเพื่อนร่วมงานเมื่อเขาขอความช่วยเหลือ" },
+            { typeA: "COM", typeB: "COL", textA: "ฉันตั้งใจฟังสิ่งที่คนอื่นพูด และพยายามหาจุดร่วมในการทำงานร่วมกันโดยใช้น้ำเสียงที่เป็นมิตรและสร้างสรรค์", textB: "ฉันเข้าใจสไตล์การทำงานที่ต่างกันของคนในทีมและปรับวิธีการคุยให้เข้ากับธรรมชาติของแต่ละคน" },
+            { typeA: "COM", typeB: "COL", textA: "ฉันสร้างพื้นที่ปลอดภัยที่ทุกคนกล้าพูดความจริง เพื่อแก้ไขความเข้าใจผิดและสร้างทีมที่กล้าแสดงออกอย่างสร้างสรรค์", textB: "ฉันสนับสนุนการสร้างทีมที่มีความหลากหลาย เพื่อนำจุดเด่นของแต่ละคนมาผสมผสานเป็นพลังในการทำงานร่วมกัน" },
+            { typeA: "COM", typeB: "COL", textA: "เมื่อต้องทำงานกับแผนกอื่น ฉันจะอธิบายงานของตัวเองอย่างกระชับและสุภาพ เพื่อให้เขาร่วมมือกับเราได้ง่าย", textB: "ฉันยินดีแชร์ข้อมูลและแชร์ทรัพยากรที่มีให้เพื่อนต่างแผนก เพื่อให้งานส่วนกลางบรรลุผลสำเร็จ" },
+            { typeA: "COM", typeB: "COG", textA: "ฉันคอยประสานงานและช่วยทีมติดต่อกับหน่วยงานอื่น เพื่อลดอุปสรรคและแก้ปัญหาระหว่างแผนกได้อย่างรวดเร็ว", textB: "ฉันจัดลำดับความสำคัญของงานในแต่ละวัน และวางแผนเวลาทำงานของตัวเองเพื่อให้ส่งมอบงานได้ทันเวลา" },
+            { typeA: "COM", typeB: "COG", textA: "ฉันชอบสร้างเครือข่ายความร่วมมือระหว่างฝ่ายต่าง ๆ เพื่อให้เป้าหมายในภาพรวมขององค์กรสำเร็จไปด้วยกัน", textB: "ฉันวิเคราะห์ขั้นตอนการทำงานในภาพรวมของทีม เพื่อหาจุดคอขวดและปรับปรุงระบบงานให้มีประสิทธิภาพมากขึ้น" },
+            { typeA: "COM", typeB: "COG", textA: "ฉันให้เกียรติและรับฟังมุมมองที่แตกต่างจากคู่ค้า ลูกค้า หรือเพื่อนร่วมงานต่างสาขา เพื่อสร้างงานที่ดีร่วมกัน", textB: "ฉันประเมินความเสี่ยงและทรัพยากรที่มีในระยะยาว เพื่อตัดสินใจเชิงกลยุทธ์ในการขยายงานหรือลงทุนใหม่ ๆ" },
+            { typeA: "COM", typeB: "COG", textA: "ฉันพยายามจัดแนวทางงานของทีมให้ตอบโจทย์พันธมิตรภายนอก และสื่อสารเพื่อสร้างผลลัพธ์ที่เป็นประโยชน์กับทุกฝ่าย", textB: "เมื่อเกิดปัญหาเร่งด่วนในงาน ฉันวิเคราะห์หาสาเหตุที่แท้จริง อย่างรวดเร็ว เพื่อแก้ปัญหาที่ต้นตอไม่ใช่แค่ปลายเหตุ" },
+            { typeA: "COM", typeB: "CRE", textA: "ฉันเป็นตัวแทนในการเจรจาเชิงกลยุทธ์ เพื่อจับมือกับพาร์ทเนอร์ภายนอกและผลักดันธุรกิจในระดับภูมิภาคหรือระดับโลก", textB: "ฉันชอบเสนอไอเดียใหม่ ๆ ในที่ประชุม แม้ว่าจะเป็นแนวคิดที่แตกต่างจากเดิมก็ตาม" },
+            { typeA: "COM", typeB: "CRE", textA: "ฉันพูดคุยเพื่อสร้างพลังใจเชิงบวกให้เพื่อนร่วมงาน และแชร์คำชมหรือความสำเร็จร่วมกันเสมอ", textB: "ฉันสนับสนุนให้เพื่อนร่วมทีมคิดนอกกรอบ และช่วยพัฒนาไอเดียเหล่านั้นให้เป็นจริง" },
+            { typeA: "COM", typeB: "CRE", textA: "ฉันพูดคุยกับทีมอย่างเปิดใจคอยให้ฟีดแบ็กที่สร้างสรรค์ เพื่อช่วยให้ทีมเก่งขึ้นและทำงานอย่างมีความสุข", textB: "ฉันสร้างโอกาสและพื้นที่ให้เกิดความคิดสร้างสรรค์ พร้อมทั้งชื่นชมผู้ที่กล้าลองสิ่งใหม่ ๆ แม้จะไม่ได้ประสบความสำเร็จทุกครั้งก็ตาม" },
+            { typeA: "COM", typeB: "CRE", textA: "ฉันสื่อสารวิสัยทัศน์ที่น่าตื่นเต้นและสร้างแรงบันดาลใจ เพื่อให้ทุกคนในองค์กรเห็นภาพความสำเร็จเดียวกัน", textB: "ฉันใส่ใจสังเกตจุดที่สามารถปรับปรุงได้ในการทำงานประจำวัน และริเริ่มพัฒนาให้มีประสิทธิภาพยิ่งขึ้นอย่างต่อเนื่อง" },
+            { typeA: "COL", typeB: "COG", textA: "ฉันจัดประชุมสั้น ๆ ร่วมกับหัวหน้างานแผนกอื่น เพื่อวางแผนการทำงานร่วมกันและลดการทำงานที่ซ้ำซ้อน", textB: "ฉันยอมรับผิดอย่างจริงใจเมื่อทำงานพลาด และรีบหาวิธีแก้ไขพร้อมเรียนรู้จากความล้มเหลวนั้น" },
+            { typeA: "COL", typeB: "COG", textA: "ฉันส่งเสริมการทำงานร่วมกันระหว่างหน่วยงาน โดยกำหนดเป้าหมายร่วมและสร้างแรงจูงใจที่สนับสนุนความร่วมมือของทุกฝ่าย", textB: "ฉันรักษาสติและอารมณ์ได้ดีเมื่อเผชิญกับสถานการณ์กดดัน และแสดงออกอย่างมีวุฒิภาวะเพื่อเป็นหลักยึดให้ทีม" },
+            { typeA: "COL", typeB: "COG", textA: "ฉันให้ข้อมูลเกี่ยวกับบริษัทอย่างถูกต้องและปลอดภัยเมื่อต้องติดต่อกับลูกค้าหรือพาร์ทเนอร์ต่างองค์กร", textB: "ฉันยืดหยุ่นและพร้อมปรับตัวเมื่อแนวทางธุรกิจเปลี่ยนไป เพื่อนำพาคนอื่นในองค์กรผ่านช่วงเวลาที่ท้าทาย" },
+            { typeA: "COL", typeB: "COG", textA: "ฉันจัดการเรื่องผลประโยชน์ของทีมให้ลงตัวกับความต้องการของลูกค้าและผู้มีส่วนได้ส่วนเสียภายนอกอย่างเหมาะสม", textB: "ฉันทบทวนและตั้งคำถามกับกรอบความคิดของตนเองอยู่เสมอ เพื่อเปิดรับแนวทางหรือวิธีการใหม่ ๆ ที่อาจดีกว่า" },
+            { typeA: "COL", typeB: "CRE", textA: "ฉันกำหนดทิศทางความร่วมมือกับเครือข่ายธุรกิจภายนอก เพื่อสร้างคุณค่าและโอกาสเติบโตใหม่ ๆ ให้องค์กร", textB: "ฉันร่วมยินดีและเปิดรับเมื่อทีมต้องการนำวิธีการหรือเครื่องมือใหม่ ๆ มาใช้ในการทำงาน" },
+            { typeA: "COL", typeB: "CRE", textA: "ฉันชอบมีส่วนร่วมในการทำกิจกรรมกลุ่มของทีม และคอยช่วยเหลือให้บรรยากาศการทำงานเป็นกันเอง", textB: "ฉันออกแบบกิจกรรมหรือเวิร์กชอปที่น่าสนใจ (เช่น บอร์ดเกมหรือเกมจำลองสถานการณ์) เพื่อกระตุ้นให้ทีมร่วมกันระดมความคิดและสร้างสรรค์แนวทางใหม่ ๆ" },
+            { typeA: "COL", typeB: "CRE", textA: "ฉันมอบหมายงานอย่างเหมาะสม เปิดโอกาสให้ทีมสามารถตัดสินใจได้ด้วยตนเอง และพร้อมทำหน้าที่เป็นโค้ชและผู้สนับสนุนเมื่อจำเป็น", textB: "ฉันสนับสนุนงบประมาณและเวลาทำงานให้ทีมได้ทดลองทำนวัตกรรมใหม่ ๆ เพื่อสร้างความก้าวหน้าให้องค์กร" },
+            { typeA: "COL", typeB: "CRE", textA: "ฉันสร้างและส่งเสริมวัฒนธรรมองค์กรที่ตั้งอยู่บนพื้นฐานของความไว้วางใจ การสื่อสารที่เปิดกว้าง และการทำงานร่วมกันเป็นทีม", textB: "ฉันส่งเสริมให้ทีมแบ่งปันบทเรียนจากความผิดพลาด เพื่อร่วมกันนำมาพัฒนาต่อยอดเป็นแนวทางหรือวิธีการที่ดีขึ้นอย่างสร้างสรรค์" },
+            { typeA: "COG", typeB: "CRE", textA: "ฉันพยายามทำความเข้าใจภาพรวมของธุรกิจ เพื่อให้การทำงานของตนสอดคล้องกับเป้าหมายของหน่วยงาน", textB: "ฉันลองปรับแต่งวิธีนำเสนอหรือส่งมอบงาน เพื่อให้ตอบโจทย์และตรงใจลูกค้ามากขึ้น" },
+            { typeA: "COG", typeB: "CRE", textA: "ฉันเก็บรวบรวมและวิเคราะห์ข้อมูลจากหลากหลายแหล่งเพื่อใช้ประกอบการตัดสินใจของทีมอย่างมีหลักการ", textB: "ฉันออกแบบบริการหรือแนวทางการให้บริการรูปแบบใหม่ เพื่อเพิ่มความสามารถในการแข่งขันขององค์กรในตลาด" },
+            { typeA: "COG", typeB: "CRE", textA: "ฉันคาดการณ์แนวโน้มธุรกิจในอนาคต เพื่อกำหนดวิสัยทัศน์และแผนกลยุทธ์เชิงรุกให้องค์กร", textB: "ฉันขับเคลื่อนการพัฒนาเชิงโครงสร้างขององค์กร เพื่อให้สามารถปรับตัวต่อการเปลี่ยนแปลงของอุตสาหกรรมได้อย่างมีประสิทธิภาพ" },
+            { typeA: "COG", typeB: "CRE", textA: "ฉันเชื่อมโยงข้อมูลที่ดูเหมือนจะไม่เกี่ยวข้องกัน เพื่อค้นหาโอกาสทางธุรกิจใหม่ ๆ หรือวางแผนป้องกันวิกฤตไว้ล่วงหน้า", textB: "ฉันมองหาเทคโนโลยีหรือโมเดลใหม่ ๆ อยู่เสมอ เพื่อนำมาปฏิวัติกระบวนการทำงานแบบเดิมให้รวดเร็วและคุ้มทุนยิ่งขึ้น" }
+        ];
+
+        const part2Questions = [
+            "ในฐานะผู้นำ คุณอยากพัฒนาหรือปรับปรุงทักษะการสื่อสารในเรื่องใดมากที่สุด?",
+            "คุณอยากพัฒนาความสามารถในการสร้างความร่วมมือร่วมใจ (Collaboration) ในทีมหรือระหว่างแผนกในเรื่องใดมากที่สุด?",
+            "คุณคิดว่าผู้นำที่ดีในแบบที่คุณอยากเป็น ควรมีกระบวนการคิดหรือคุณภาพทางความคิดแบบไหน?",
+            "ความคิดสร้างสรรค์แบบไหนที่คุณคิดว่าจะช่วยขับเคลื่อนทีมและสร้างผลงานใหม่ ๆ ให้กับองค์กรได้ดีที่สุด?"
+        ];
+
+        let currentStage = 'REG'; 
+        let p1Index = 0;
+        let p2Index = 0;
+        let p1Answers = {}; 
+        let p2Answers = {}; 
+        let userData = { name: '', email: '' };
+        let autoTimer = null;
+        let currentQuestions = [];
+        let capturedImage64 = ""; 
+        const TOTAL_STEPS = 29; 
+
+        window.onload = function() {
+            part1Questions.forEach((q, i) => q.id = i);
+            const savedStateStr = localStorage.getItem('assessmentState');
+            
+            if (savedStateStr) {
+                const savedState = JSON.parse(savedStateStr);
+                const currentTime = Date.now();
+                const savedTime = savedState.timestamp || 0;
+                const THIRTY_MINUTES = 30 * 60 * 1000; 
+
+                if (currentTime - savedTime > THIRTY_MINUTES) {
+                    clearState();
+                    switchView('REG');
+                } else {
+                    Swal.fire({
+                        title: 'พบข้อมูลค้างไว้',
+                        text: "ต้องการทำแบบสำรวจต่อจากครั้งที่แล้วหรือไม่? (ระบบจะบันทึกข้อมูลไว้ให้ 30 นาที)",
+                        icon: 'info',
+                        showCancelButton: true,
+                        confirmButtonText: 'ทำต่อ',
+                        cancelButtonText: 'เริ่มใหม่ทั้งหมด',
+                        confirmButtonColor: '#da291c',
+                        cancelButtonColor: '#777'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            loadState(savedState);
+                        } else {
+                            clearState();
+                            switchView('REG');
+                        }
+                    });
+                }
+            } else {
+                switchView('REG');
+            }
+        };
+
+        function shuffleArray(array) {
+            let newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        function switchView(stage) {
+            currentStage = stage;
+            document.getElementById('view-registration').style.display = 'none';
+            document.getElementById('view-transition-p1').style.display = 'none';
+            document.getElementById('view-part1').style.display = 'none';
+            document.getElementById('view-transition').style.display = 'none';
+            document.getElementById('view-part2').style.display = 'none';
+            document.getElementById('view-summary').style.display = 'none';
+
+            if (stage === 'REG') {
+                document.getElementById('view-registration').style.display = 'block';
+                document.getElementById('progressBar').style.width = '0%';
+            } else if (stage === 'TRANSITION_P1') {
+                document.getElementById('view-transition-p1').style.display = 'block';
+                document.getElementById('progressBar').style.width = '5%';
+            } else if (stage === 'PART1') {
+                document.getElementById('view-part1').style.display = 'block';
+                renderPart1();
+            } else if (stage === 'TRANSITION') {
+                document.getElementById('view-transition').style.display = 'block';
+                updateProgress();
+            } else if (stage === 'PART2') {
+                document.getElementById('view-part2').style.display = 'block';
+                renderPart2();
+            } else if (stage === 'SUMMARY') {
+                document.getElementById('view-summary').style.display = 'block';
+                renderSummary();
+            }
+            saveState();
+        }
+
+        function updateProgress() {
+            let currentStep = p1Index + 1; 
+            if (currentStage === 'TRANSITION') currentStep = 25;
+            if (currentStage === 'PART2') currentStep = 25 + p2Index;
+            if (currentStage === 'SUMMARY') currentStep = 29;
+            
+            const pct = (currentStep / TOTAL_STEPS) * 100;
+            document.getElementById('progressBar').style.width = pct + '%';
+        }
+
+        function saveState() {
+            const state = { 
+                currentStage, 
+                p1Index, 
+                p2Index, 
+                p1Answers, 
+                p2Answers, 
+                userData, 
+                currentQuestions,
+                timestamp: Date.now() 
+            };
+            localStorage.setItem('assessmentState', JSON.stringify(state));
+        }
+
+        function loadState(state) {
+            currentStage = state.currentStage;
+            p1Index = state.p1Index;
+            p2Index = state.p2Index;
+            p1Answers = state.p1Answers || {};
+            p2Answers = state.p2Answers || {};
+            userData = state.userData || {name:'', email:''};
+            currentQuestions = state.currentQuestions || part1Questions;
+            
+            if(userData.name) document.getElementById('regName').value = userData.name;
+            if(userData.email) document.getElementById('regEmail').value = userData.email;
+            
+            switchView(currentStage);
+        }
+
+        function clearState() {
+            localStorage.removeItem('assessmentState');
+            currentStage = 'REG';
+            p1Index = 0;
+            p2Index = 0;
+            p1Answers = {};
+            p2Answers = {};
+            currentQuestions = [];
+            userData = {name:'', email:''};
+            document.getElementById('regName').value = '';
+            document.getElementById('regEmail').value = '';
+        }
+
+        function validateNameInput(input) {
+            const start = input.selectionStart;
+            const value = input.value;
+            const newValue = value.replace(/[^a-zA-Z\s]/g, '');
+            if (value !== newValue) {
+                input.value = newValue;
+                const offset = value.length - newValue.length;
+                input.setSelectionRange(start - offset, start - offset);
+            }
+        }
+
+        function sanitizeEmail(email) {
+            return email.replace(/\s+/g, '').toLowerCase();
+        }
+
+        async function startAssessment() {
+            const name = document.getElementById('regName').value.trim();
+            let rawEmail = document.getElementById('regEmail').value;
+            
+            const email = sanitizeEmail(rawEmail);
+            document.getElementById('regEmail').value = email; 
+
+            if (!name) { Swal.fire('แจ้งเตือน', 'กรุณาระบุชื่อ-นามสกุล (ภาษาอังกฤษ)', 'warning'); return; }
+            if (!email || !email.includes('@')) { Swal.fire('แจ้งเตือน', 'กรุณาระบุอีเมลให้ถูกต้อง', 'warning'); return; }
+
+            Swal.fire({
+                title: 'กำลังตรวจสอบอีเมล...',
+                text: 'กรุณารอสักครู่ ระบบกำลังตรวจสอบสิทธิ์การทำแบบสำรวจของคุณ',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            try {
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: 'checkEmail', email: email })
+                });
+
+                const resData = await response.json();
+
+                if (resData.status === 'duplicate') {
+                    Swal.fire({
+                        title: 'ไม่สามารถทำแบบสำรวจได้',
+                        text: resData.message,
+                        icon: 'error',
+                        confirmButtonColor: '#da291c'
+                    });
+                    return;
+                }
+
+                Swal.close();
+                userData.name = name;
+                userData.email = email;
+                
+                switchView('TRANSITION_P1');
+
+            } catch (err) {
+                console.error(err);
+                Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์เพื่อตรวจสอบอีเมลได้', 'error');
+            }
+        }
+
+        function startPart1() {
+            let shuffled = shuffleArray(part1Questions);
+            currentQuestions = shuffled.map(q => {
+                return { ...q, swapChoices: Math.random() > 0.5 };
+            });
+            switchView('PART1');
+        }
+
+        function renderPart1() {
+            if(autoTimer) clearTimeout(autoTimer);
+            updateProgress();
+
+            document.getElementById('p1Number').innerText = `ส่วนที่ 1: ข้อที่ ${p1Index + 1} / 24`;
+            
+            const q = currentQuestions[p1Index];
+            const qId = q.id;
+            document.getElementById('btnPrevP1').style.display = p1Index === 0 ? 'none' : 'inline-block';
+
+            const cardA = `<div class="option-card ${p1Answers[qId] === q.typeA ? 'selected' : ''}" onclick="selectP1('${q.typeA}')"><div class="option-text">${q.textA}</div></div>`;
+            const cardB = `<div class="option-card ${p1Answers[qId] === q.typeB ? 'selected' : ''}" onclick="selectP1('${q.typeB}')"><div class="option-text">${q.textB}</div></div>`;
+
+            document.getElementById('p1Options').innerHTML = q.swapChoices ? cardB + cardA : cardA + cardB;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function selectP1(type) {
+            const qId = currentQuestions[p1Index].id;
+            p1Answers[qId] = type;
+            saveState();
+            renderPart1(); 
+
+            autoTimer = setTimeout(() => {
+                if (p1Index < 23) {
+                    p1Index++;
+                    switchView('PART1');
+                } else {
+                    switchView('TRANSITION');
+                }
+            }, 400);
+        }
+
+        function prevQuestionP1() { if (p1Index > 0) { p1Index--; switchView('PART1'); } }
+        function backToPart1() { p1Index = 23; switchView('PART1'); }
+        function startPart2() { p2Index = 0; switchView('PART2'); }
+
+        function renderPart2() {
+            updateProgress();
+            document.getElementById('p2Number').innerText = `ข้อเขียนที่ ${p2Index + 1} / 4`;
+            document.getElementById('p2QuestionText').innerText = part2Questions[p2Index];
+            
+            const textarea = document.getElementById('part2Text');
+            textarea.value = p2Answers[p2Index] || "";
+            
+            const btnNext = document.getElementById('btnNextP2');
+            btnNext.innerText = p2Index === 3 ? "ส่งคำตอบ (Submit)" : "ถัดไป";
+            
+            validateText();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function validateText() {
+            const text = document.getElementById('part2Text').value;
+            const len = text.length;
+            const charCount = document.getElementById('charCount');
+            const btnNext = document.getElementById('btnNextP2');
+
+            if (len >= 100 && len <= 150) {
+                charCount.className = "char-count valid"; 
+                charCount.innerText = `${len} / 150 (ผ่านเกณฑ์แล้ว สามารถกดถัดไปได้)`;
+                btnNext.disabled = false; 
+                p2Answers[p2Index] = text;
+                saveState(); 
+            } else {
+                charCount.className = "char-count invalid"; 
+                charCount.innerText = `${len} / 150 (พิมพ์เพิ่มอีกอย่างน้อย ${100 - len} ตัวอักษร)`;
+                btnNext.disabled = true; 
+            }
+        }
+
+        function prevQuestionP2() {
+            if (p2Index > 0) { p2Index--; switchView('PART2'); } 
+            else { switchView('TRANSITION'); }
+        }
+
+        function nextQuestionP2() {
+            if (p2Index < 3) { p2Index++; switchView('PART2'); } 
+            else { submitData(); }
+        }
+
+        function generateBarHtml(label, score) {
+            let redVal = Math.min(score, 4);
+            let amberVal = Math.min(Math.max(score - 4, 0), 4);
+            let greenVal = Math.min(Math.max(score - 8, 0), 4);
+            
+            let redPct = score > 0 ? (redVal / score) * 100 : 0;
+            let amberPct = score > 0 ? (amberVal / score) * 100 : 0;
+            let greenPct = score > 0 ? (greenVal / score) * 100 : 0;
+            
+            let trackHeightPct = (score / 12) * 100;
+
+            let formattedLabel = label.replace(" ", "<br>");
+
+            return `
+                <div class="bar-group">
+                    <div class="bar-track" style="height: ${trackHeightPct}%;">
+                        ${greenVal > 0 ? `<div class="segment-green" style="height: ${greenPct}%;"></div>` : ''}
+                        ${amberVal > 0 ? `<div class="segment-amber" style="height: ${amberPct}%;"></div>` : ''}
+                        ${redVal > 0 ? `<div class="segment-red" style="height: ${redPct}%;"></div>` : ''}
+                    </div>
+                    <div class="bar-labels">
+                        <div class="bar-label-title">${formattedLabel}</div>
+                        <div class="bar-label-score">${score}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSummary() {
+            document.getElementById('resName').innerText = userData.name.toUpperCase();
+            document.getElementById('resEmail').innerText = userData.email;
+
+            document.getElementById('expName').innerText = userData.name.toUpperCase();
+            document.getElementById('expEmail').innerText = userData.email;
+
+            let scores = { COM: 0, COL: 0, COG: 0, CRE: 0 };
+            for (let i = 0; i < 24; i++) {
+                if(p1Answers[i]) scores[p1Answers[i]]++;
+            }
+
+            const chartHtml = `
+                <div class="chart-box">
+                    <div class="chart-grid">
+                        <div class="grid-line"><span class="grid-label">12</span></div>
+                        <div class="grid-line"><span class="grid-label">8</span></div>
+                        <div class="grid-line"><span class="grid-label">4</span></div>
+                        <div class="grid-line base"><span class="grid-label">0</span></div>
+                    </div>
+                    <div class="bars-container">
+                        ${generateBarHtml("COMMUNICATION", scores.COM)}
+                        ${generateBarHtml("COLLABORATION", scores.COL)}
+                        ${generateBarHtml("COGNITIVE CAPABILITY", scores.COG)}
+                        ${generateBarHtml("CREATIVITY", scores.CRE)}
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('chartContainer').innerHTML = chartHtml;
+            document.getElementById('expChartContainer').innerHTML = chartHtml;
+        }
+
+        async function submitData() {
+            if (WEB_APP_URL === 'ใส่_URL_WEB_APP_ของคุณที่นี่' || !WEB_APP_URL.startsWith('http')) {
+                Swal.fire('แจ้งเตือน', 'กรุณานำ URL ที่ได้จากการ Deploy Web App มาใส่ในตัวแปร WEB_APP_URL ในไฟล์ HTML ก่อนครับ', 'warning');
+                return;
+            }
+
+            Swal.fire({
+                title: 'กำลังประมวลผล...',
+                text: 'ระบบกำลังจัดทำภาพผลลัพธ์และบันทึกข้อมูล กรุณารอสักครู่',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            renderSummary();
+            switchView('SUMMARY');
+
+            setTimeout(async () => {
+                try {
+                    const targetArea = document.getElementById('export-area');
+                    const canvas = await html2canvas(targetArea, { scale: 2, useCORS: true, allowTaint: true });
+                    capturedImage64 = canvas.toDataURL("image/png");
+
+                    let scores = { COM: 0, COL: 0, COG: 0, CRE: 0 };
+                    for (let i = 0; i < 24; i++) { if(p1Answers[i]) scores[p1Answers[i]]++; }
+
+                    const payload = {
+                        user: userData,
+                        part1: p1Answers,
+                        part2: p2Answers,
+                        scores: scores,
+                        image64: capturedImage64
+                    };
+
+                    const response = await fetch(WEB_APP_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const data = await response.json();
+
+                    if(data.status === 'success') {
+                        Swal.fire({
+                            title: 'ส่งคำตอบเรียบร้อย!',
+                            text: 'ระบบบันทึกข้อมูล และส่งภาพสรุปภาพรวมสไตล์การทำงานของคุณไปยังอีเมลของคุณเรียบร้อยแล้ว',
+                            icon: 'success',
+                            confirmButtonColor: '#da291c'
+                        });
+                    } else if (data.status === 'duplicate') {
+                        Swal.fire('ไม่สามารถบันทึกข้อมูลได้', data.message, 'error');
+                    } else {
+                        Swal.fire('เกิดข้อผิดพลาด', 'บันทึกข้อมูลไม่สำเร็จ: ' + data.message, 'error');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้', 'error');
+                }
+            }, 500);
+        }
+
+        function downloadPNG() {
+            if (!capturedImage64) return;
+            const link = document.createElement('a');
+            link.download = userData.name.replace(/\s+/g, '_') + '_WorkStyle_Result.png';
+            link.href = capturedImage64;
+            link.click();
+        }
+
+        function closeWindow() {
+            clearState();
+            try { window.close(); } catch (e) {}
+            Swal.fire({
+                title: 'ขอบคุณที่ร่วมกิจกรรม',
+                text: 'คุณสามารถปิดหน้าต่างเบราว์เซอร์นี้ได้เลย',
+                icon: 'success',
+                showConfirmButton: false
+            });
+        }
+    </script>
+</body>
+</html>
